@@ -124,6 +124,17 @@ async function _getReport(reportId) {
   try {
     // SELECT the report with id equal to reportId
     // return the report
+    const {
+      rows: [report],
+    } = await client.query(
+      `SELECT * FROM reports
+      WHERE id=$1;
+      `,
+      [reportId]
+    );
+
+    console.log("_getReport:", report);
+    return report;
   } catch (error) {
     throw error;
   }
@@ -141,11 +152,30 @@ async function _getReport(reportId) {
 async function closeReport(reportId, password) {
   try {
     // First, actually grab the report with that id
+    const report = await _getReport(reportId);
+
     // If it doesn't exist, throw an error with a useful message
-    // If the passwords don't match, throw an error
-    // If it has already been closed, throw an error with a useful message
-    // Finally, update the report if there are no failures, as above
-    // Return a message stating that the report has been closed
+    if (!report) {
+      throw new Error("Report does not exist with that id");
+
+      // If the passwords don't match, throw an error
+    } else if (report.password !== password) {
+      throw new Error("Password incorrect for this report, please try again");
+
+      // If it has already been closed, throw an error with a useful message
+    } else if (!report.isOpen) {
+      throw new Error("This report has already been closed");
+
+      // Finally, update the report if there are no failures, as above
+      // Return a message stating that the report has been closed
+    } else {
+      // THIS IS THE SPOT WE ENDED DURING CLASS - THURSDAY
+      report.isOpen = false;
+      console.log("isOpenReport:", report);
+      return {
+        message: "Report successfully closed!",
+      };
+    }
   } catch (error) {
     throw error;
   }
