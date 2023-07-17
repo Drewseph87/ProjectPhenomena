@@ -153,24 +153,33 @@ async function closeReport(reportId, password) {
   try {
     // First, actually grab the report with that id
     const report = await _getReport(reportId);
-
     // If it doesn't exist, throw an error with a useful message
     if (!report) {
       throw new Error("Report does not exist with that id");
-
       // If the passwords don't match, throw an error
     } else if (report.password !== password) {
       throw new Error("Password incorrect for this report, please try again");
-
       // If it has already been closed, throw an error with a useful message
     } else if (!report.isOpen) {
       throw new Error("This report has already been closed");
-
       // Finally, update the report if there are no failures, as above
       // Return a message stating that the report has been closed
+      // or do it this way: next({
+      //   name: "UserExistsError",
+      //   message: "A user by that username already exists",
+      // });
     } else {
-      // THIS IS THE SPOT WE ENDED DURING CLASS - THURSDAY
-      report.isOpen = false;
+      const {
+        rows: [report],
+      } = await client.query(
+        `
+        UPDATE reports
+        SET "isOpen"=false
+        WHERE id=$1
+        RETURNING *;
+        `,
+        [reportId]
+      );
       console.log("isOpenReport:", report);
       return {
         message: "Report successfully closed!",
@@ -194,16 +203,39 @@ async function closeReport(reportId, password) {
  */
 async function createReportComment(reportId, commentFields) {
   // read off the content from the commentFields
-
+  const { content } = commentFields;
   try {
     // grab the report we are going to be commenting on
+    const report = await _getReport(reportId);
     // if it wasn't found, throw an error saying so
-    // if it is not open, throw an error saying so
-    // if the current date is past the expiration, throw an error saying so
-    // you can use Date.parse(report.expirationDate) < new Date() to check
-    // all go: insert a comment
-    // then update the expiration date to a day from now
-    // finally, return the comment
+    if (!report) {
+      throw new Error("That report does not exist, no comment has been made");
+    } else if (!report.isOpen) {
+      // if it is not open, throw an error saying so
+      throw new Error("That report has been closed, no comment has been made");
+    } else if (Date.parse(report.expirationDate) < new Date()) {
+      // if the current date is past the expiration, throw an error saying so
+      // you can use Date.parse(report.expirationDate) < new Date() to check
+      throw new Error("The discussion time on this report has expired, no comment has been made");
+    } else {
+      // all go: insert a comment
+      // then update the expiration date to a day from now
+      // finally, return the comment
+      const { rows: [comment] } = await client.query(`
+        INSERT INTO comments("reportId", content)
+        VALUES ($1, $2)
+        RETURNING *;
+      `, [reportId, content]);
+      const { rows: [updatedReport] } = await client.query(`
+      UPDATE reports
+      SET "expirationDate" = CURRENT_TIMESTAMP + interval '1 day'
+      WHERE id=$1
+      RETURNING *;
+      `, [reportId]);
+      console.log("Created comment: ", comment);
+      console.log("Commented report: ", updatedReport);
+      return comment;
+    }
   } catch (error) {
     throw error;
   }

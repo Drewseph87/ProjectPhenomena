@@ -7,17 +7,17 @@ let reportIdToCreate, reportIdToClose;
 describe('Database', () => {
   const testComment = 'Did the humanoid eat colorful candy?';
   let testReportForComments, reportIdForComments;
-  beforeAll(async() => {
+  beforeAll(async () => {
     await client.connect();
     await rebuildDB();
   })
-  afterAll(async() => {
+  afterAll(async () => {
     await client.end();
   })
   describe('Reports', () => {
     let testReport, testReportToClose, reports, singleReport;
     describe('createReport', () => {
-      beforeAll(async() => {
+      beforeAll(async () => {
         testReport = await createReport({
           title: 'Bubbling Water',
           location: 'Bermuda',
@@ -33,7 +33,7 @@ describe('Database', () => {
         });
         reportIdToClose = testReportToClose.id;
         const expirationDate = new Date();
-        expirationDate.setDate(expirationDate.getDate() - 1); 
+        expirationDate.setDate(expirationDate.getDate() - 1);
         await client.query(`
           UPDATE reports
           SET "expirationDate"='${expirationDate.toISOString()}'
@@ -59,7 +59,7 @@ describe('Database', () => {
       });
     });
     describe('getOpenReports', () => {
-      beforeAll(async() => {
+      beforeAll(async () => {
         await client.query(`
           INSERT INTO comments("reportId", content)
           values($1, $2)
@@ -99,23 +99,23 @@ describe('Database', () => {
         expect(singleReport).toEqual(expect.objectContaining({
           comments: expect.any(Array),
         }));
-        const {comments: [firstComment]} = singleReport;
+        const { comments: [firstComment] } = singleReport;
         expect(firstComment.content).toEqual(testComment);
       });
     });
     describe('_getReport helper function', () => {
       let report;
-      beforeAll(async() => {
+      beforeAll(async () => {
         report = await _getReport(reportIdToCreate);
       })
       it('SELECTs and returns the report with id equal to reportId', async () => {
         expect(report.id).toEqual(reportIdToCreate);
       });
-      
+
     })
     describe('closeReport', () => {
       let message, report;
-      beforeAll(async() => {
+      beforeAll(async () => {
       })
       it('If report doesnt exist, throws an error with a useful message', async () => {
         await expect(closeReport(300)).rejects.toThrow('Report does not exist with that id');
@@ -133,7 +133,7 @@ describe('Database', () => {
       });
       it('Finally, updates the report if there are no failures, as above', async () => {
         message = await closeReport(reportIdToCreate, 'ShipIsNoMore');
-        const {rows} = await client.query(`
+        const { rows } = await client.query(`
         SELECT * FROM reports
         WHERE id=$1;
         `, [reportIdToCreate]);
@@ -141,14 +141,14 @@ describe('Database', () => {
         expect(report.isOpen).toBe(false);
       });
       it('Returns a message stating that the report has been closed', async () => {
-        expect(message).toEqual({message: "Report successfully closed!"});
+        expect(message).toEqual({ message: "Report successfully closed!" });
       });
     })
     describe('createReportComment', () => {
-      const commentFields = {content: 'something strange is happening in this galaxy, for sure'}
+      const commentFields = { content: 'something strange is happening in this galaxy, for sure' }
       const password = 'DontWatchTooLong';
-      
-      beforeAll(async() => {
+
+      beforeAll(async () => {
         testReportForComments = await createReport({
           title: 'Beckoning Being',
           location: 'Starry Sky',
@@ -187,7 +187,7 @@ describe('Database', () => {
         `, [reportIdForComments]);
         await expect(createReportComment(reportIdForComments, commentFields)).rejects.toThrow('That report has been closed, no comment has been made');
       });
-      
+
     })
   })
 });
