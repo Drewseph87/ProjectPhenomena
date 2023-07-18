@@ -10,7 +10,8 @@
     "test": "jest  --runInBand --verbose",
     "test:watch": "jest --watchAll --runInBand --verbose",
     "test:watch:db": "jest --watchAll db",
-    "test:watch:api": "jest --watchAll api"
+    "test:watch:api": "jest --watchAll api",
+    "migrate": "node-pg-migrate -m db/migrations"
   },
   "keywords": [],
   "author": "",
@@ -23,9 +24,11 @@
     "express": "^4.17.1",
     "jest": "^26.4.2",
     "morgan": "^1.10.0",
-    "pg": "^8.3.0"
+    "pg": "^8.3.0",
+    "node-pg-migrate": "^6.2.2"
   },
   "devDependencies": {
+    "@flydotio/dockerfile": "^0.3.3",
     "nodemon": "^2.0.4"
   }
 }
