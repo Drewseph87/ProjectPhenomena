@@ -2,7 +2,8 @@
 const { Client } = require("pg");
 
 // Create a constant, CONNECTION_STRING, from either process.env.DATABASE_URL or postgres://localhost:5432/phenomena-dev
-const client = new Client("postgres://localhost:5432/phenomena-dev");
+const CONNECTION_STRING = process.env.DATABASE_URL || "postgres://localhost:5432/phenomena-dev";
+const client = new Client(CONNECTION_STRING);
 
 // Create the client using new Client(CONNECTION_STRING)
 // Do not connect to the client in this file!
