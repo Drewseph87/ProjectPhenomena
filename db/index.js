@@ -50,7 +50,9 @@ async function getOpenReports() {
       `,
         [report.id]
       );
-      report.comments = commentsArray;
+      if (commentsArray.length >= 0) {
+        report.comments = commentsArray;
+      }
       delete report.password;
       if (Date.parse(report.expirationDate) > new Date()) {
         report.isExpired = false;

@@ -25,18 +25,26 @@ server.use(cors());
 server.use(bodyParser.json());
 
 // Have the server use your api router with prefix '/api'
-// const apiRouter = require('./api');
-// server.use('/api', apiRouter);
+const { apiRouter } = require('./api');
+server.use('/api', apiRouter);
 
 // Import the client from your db/index.js
 const { client } = require('./db');
 
+server.get('/', (req, res, next) => {
+    res.send('<h1>Welcome to Phenomena</h1>');
+})
+
 // Create custom 404 handler that sets the status code to 404.
 server.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(404)
-        .json({ error: 'Not Found!' })
-        .send('<h1>404 Not Found!</h1>');
+    if (err.status === 404) {
+        console.error(err.stack);
+        res.status(404)
+            .json({ error: 'Not Found!' })
+            .send('<h1>404 Not Found!</h1>');
+    } else {
+        next(err);
+    }
 });
 
 // Create custom error handling that sets the status code to 500
