@@ -10,7 +10,7 @@ exports.up = pgm => {
         description: { type: 'text', notNull: true },
         password: { type: 'varchar(255)', notNull: true },
         isOpen: { type: 'boolean', default: true },
-        expirationDate: { type: 'timestamptz', default: "current_timestamp + interval '1 day'" }
+        expirationDate: { type: 'timestamptz', default: pgm.func("current_timestamp + interval '1 day'") }
     });
     pgm.createTable('comments', {
         id: { type: 'serial', primaryKey: true },
