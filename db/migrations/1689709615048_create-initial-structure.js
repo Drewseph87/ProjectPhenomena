@@ -17,6 +17,7 @@ exports.up = pgm => {
         reportId: { type: 'integer', references: 'reports(id)' },
         content: { type: 'text', notNull: true }
     });
+    pgm.createIndex('comments', 'reportId');
 };
 
 exports.down = pgm => {
