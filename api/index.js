@@ -6,7 +6,6 @@ const apiRouter = require('express').Router();
 const {
     getOpenReports,
     createReport,
-    _getReport,
     closeReport,
     createReportComment
 } = require('../db');
@@ -32,7 +31,7 @@ apiRouter.get('/reports', async (req, res, next) => {
     } catch (error) {
         next(error)
     }
-})
+});
 
 
 /**
@@ -45,10 +44,8 @@ apiRouter.get('/reports', async (req, res, next) => {
  */
 
 apiRouter.post('/reports', async (req, res, next) => {
-    // THIS IS WHERE WE LEFT OFF
-    // const fields = req.body;
-    console.log("post to /reports: ", req.body);
     try {
+        console.log("post to /reports: ", req.body);
         const createdReport = await createReport(req.body);
         if (createdReport) {
             res.send(createdReport);
@@ -56,10 +53,9 @@ apiRouter.post('/reports', async (req, res, next) => {
             throw error;
         }
     } catch (error) {
-        error.status = 500;
         next(error);
     }
-})
+});
 
 
 /**
@@ -71,6 +67,21 @@ apiRouter.post('/reports', async (req, res, next) => {
  * - on success, it should send back the object returned by closeReport
  * - on caught error, call next(error)
  */
+
+apiRouter.delete("/reports/:reportId", async (req, res, next) => {
+    const { reportId } = req.params;
+    const { password } = req.body;
+    try {
+        const closedReport = await closeReport(reportId, password);
+        if (closedReport) {
+            res.send(closedReport);
+        } else {
+            throw error;
+        }
+    } catch (error) {
+        next(error);
+    }
+});
 
 
 
@@ -84,9 +95,24 @@ apiRouter.post('/reports', async (req, res, next) => {
  * - on caught error, call next(error)
  */
 
+apiRouter.post('/reports/:reportId/comments', async (req, res, next) => {
+    const { reportId } = req.params;
+
+    try {
+        const createdComment = await createReportComment(reportId, req.body);
+        if (createdComment) {
+            res.send(createdComment);
+        } else {
+            throw error;
+        }
+    } catch (error) {
+        next(error);
+    }
+});
+
 
 
 // Export the apiRouter
 module.exports = {
     apiRouter,
-}
+};

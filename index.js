@@ -40,8 +40,7 @@ server.use((err, req, res, next) => {
     if (err.status === 404) {
         console.error(err.stack);
         res.status(404)
-            .json({ error: 'Not Found!' })
-            .send('<h1>404 Not Found!</h1>');
+            .send({ error: 'Not Found!' });
     } else {
         next(err);
     }
@@ -52,8 +51,7 @@ server.use((err, req, res, next) => {
 server.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500)
-        .json({ error: 'Internal server error!' })
-        .send('<h1>505 Internal Server Error</h1>');
+        .send({ error: 'Internal server error!' });
 });
 
 

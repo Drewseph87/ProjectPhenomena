@@ -248,7 +248,6 @@ module.exports = {
   client,
   getOpenReports,
   createReport,
-  _getReport,
   closeReport,
   createReportComment,
 };
