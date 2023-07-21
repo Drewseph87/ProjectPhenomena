@@ -2,7 +2,8 @@
 const { Client } = require("pg");
 
 // Create a constant, CONNECTION_STRING, from either process.env.DATABASE_URL or postgres://localhost:5432/phenomena-dev
-const CONNECTION_STRING = process.env.DATABASE_URL || "postgres://localhost:5432/phenomena-dev";
+const CONNECTION_STRING =
+  process.env.DATABASE_URL || "postgres://localhost:5432/phenomena-dev";
 const client = new Client(CONNECTION_STRING);
 
 // Create the client using new Client(CONNECTION_STRING)
@@ -219,22 +220,34 @@ async function createReportComment(reportId, commentFields) {
     } else if (Date.parse(report.expirationDate) < new Date()) {
       // if the current date is past the expiration, throw an error saying so
       // you can use Date.parse(report.expirationDate) < new Date() to check
-      throw new Error("The discussion time on this report has expired, no comment has been made");
+      throw new Error(
+        "The discussion time on this report has expired, no comment has been made"
+      );
     } else {
       // all go: insert a comment
       // then update the expiration date to a day from now
       // finally, return the comment
-      const { rows: [comment] } = await client.query(`
+      const {
+        rows: [comment],
+      } = await client.query(
+        `
         INSERT INTO comments("reportId", content)
         VALUES ($1, $2)
         RETURNING *;
-      `, [reportId, content]);
-      const { rows: [updatedReport] } = await client.query(`
+      `,
+        [reportId, content]
+      );
+      const {
+        rows: [updatedReport],
+      } = await client.query(
+        `
       UPDATE reports
       SET "expirationDate" = CURRENT_TIMESTAMP + interval '1 day'
       WHERE id=$1
       RETURNING *;
-      `, [reportId]);
+      `,
+        [reportId]
+      );
       console.log("Created comment: ", comment);
       console.log("Commented report: ", updatedReport);
       return comment;
